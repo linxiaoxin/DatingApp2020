@@ -14,7 +14,10 @@
                     <a class="nav-link" routerLink="/messages" routerLinkActive='active'>Messages</a>
                 </li>
             </ng-container>
-        </ul>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="/test-errors" routerLinkActive='active'>Errors</a>
+            </li>
+    </ul>
         <div class="dropdown" dropdown *ngIf="(currentUser | async) as user">
             <a class="dropdown-toggle text-light" dropdownToggle>Welcome {{user.username | titlecase}}</a>
             <div id="dropdown-animated" class="dropdown-menu mt-3" *dropdownMenu>
