@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators'
+import { environment } from 'src/environments/environment';
 import { User } from '../_models/user';
 
 //services is injectable and a singleton
@@ -12,7 +13,7 @@ export class AccountService {
 
   constructor(private http: HttpClient) { }
 
-  baseUrl = 'https://localhost:5001/api/';
+  baseUrl = environment.apiUrl;
   private currentUserReplay = new ReplaySubject<User>(1);
   currentUser$ = this.currentUserReplay.asObservable(); //$ to indicate that variable is observables
 
