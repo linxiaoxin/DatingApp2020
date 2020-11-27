@@ -16,5 +16,9 @@ namespace API.Interface
         Task<MemberDTO> GetMemberByUserNameAsync(string username);
 
         Task<IEnumerable<MemberDTO>> GetMembersAsync();
+
+        void Update(AppUser user);
+
+        Task<bool> SaveAllAsync();
     }
 }

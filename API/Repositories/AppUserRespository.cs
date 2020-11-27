@@ -33,7 +33,7 @@ namespace API.Repositories
 
         public async Task<AppUser> GetUserByUserNameAsync(string username)
         {
-            return await _context.Users.SingleOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
+            return await _context.Users.Include(x => x.Photos).SingleOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
         }
 
         public async Task<MemberDTO> GetMemberByUserNameAsync(string username)
@@ -53,6 +53,14 @@ namespace API.Repositories
                         .ToListAsync();
 
             return members;
+        }
+
+        public void Update(AppUser user){
+           _context.Users.Update(user);
+        }
+
+        public async Task<bool> SaveAllAsync(){
+           return await _context.SaveChangesAsync() > 0;
         }
     }
 }

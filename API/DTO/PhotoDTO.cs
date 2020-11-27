@@ -1,5 +1,3 @@
-using API.Entities;
-
 namespace API.DTO
 {
     public class PhotoDTO
