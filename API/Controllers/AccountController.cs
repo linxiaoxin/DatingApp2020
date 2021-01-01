@@ -39,8 +39,9 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
             return new UserDTO { 
                 Username = user.UserName, 
-                Token = _tokenService.CreateToken(user.UserName.ToLower()), 
-                KnownAs = user.KnownAs };
+                Token = _tokenService.CreateToken(user), 
+                KnownAs = user.KnownAs, 
+                Gender = user.Gender};
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> login(LoginUserDTO loginUserDTO)
@@ -60,9 +61,10 @@ namespace API.Controllers
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user.UserName.ToLower()),
+                Token = _tokenService.CreateToken(user),
                 KnownAs = user.KnownAs,
-                PhotoUrl = user.Photos.FirstOrDefault(x => x.isMain)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.isMain)?.Url, 
+                Gender = user.Gender
             };
         }
         private Task<bool> ExistUser(string username)

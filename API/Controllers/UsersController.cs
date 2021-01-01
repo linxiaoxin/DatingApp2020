@@ -6,6 +6,7 @@ using API.Data;
 using API.DTO;
 using API.Entities;
 using API.Extensions;
+using API.Helper;
 using API.Interface;
 using AutoMapper;
 using CloudinaryDotNet.Actions;
@@ -16,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     public class UsersController : BaseApiController
     {
@@ -29,9 +31,12 @@ namespace API.Controllers
             _userRepository = userRepository;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery] UserParams userParams)
         {
-            var user = await _userRepository.GetMembersAsync();
+            var currentUserName = User.GetUserName();
+            userParams.UserName = currentUserName;
+            var user = await _userRepository.GetMembersAsync(userParams);
+            Response.addPaginationHeader(user.CurrentPage, user.PageSize, user.TotalCount, user.TotalPages);
             return Ok(user);
         }
 
