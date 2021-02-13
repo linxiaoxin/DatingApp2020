@@ -24,7 +24,7 @@ export class ErrorsInterceptor implements HttpInterceptor {
             this.router.navigateByUrl('/server-error', navigateExtras);
             break;
           case 401: //Unauthorised
-            this.toastr.error(error.statusText, error.status);
+            this.toastr.error(error.error.title, error.status);
             break;
           case 404://not found
             this.router.navigateByUrl('/not-found');
@@ -37,7 +37,10 @@ export class ErrorsInterceptor implements HttpInterceptor {
               }
               throw modalStateErrors.flat();
             }
-            else {
+            else if(typeof(error.error) === 'object'){
+              this.toastr.error(error.error.title, error.status);
+            }
+            else{
               this.toastr.error(error.error, error.status);
             }
             break;

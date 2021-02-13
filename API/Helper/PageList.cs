@@ -22,6 +22,7 @@ namespace API.Helper
 
         public static async Task<PageList<T>> CreateAsync( IQueryable<T> source, int pageSize, int pageNum)
         {
+            if(source == null) return new PageList<T>(new List<T>(), 0, 0, pageSize);
             var count = await source.CountAsync();    
             var items = await source.Skip((pageNum-1)*pageSize).Take(pageSize).ToListAsync();
 

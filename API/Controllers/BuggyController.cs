@@ -26,8 +26,8 @@ namespace API.Controllers
         [HttpGet("Auth")]
         public ActionResult<AppUser> Auth()
         {
-            var thing = _context.Users.Find(-1);
-            return thing;
+            //var thing = _context.Users.Find(-1);
+            return Unauthorized();
         }
 
         [HttpGet("not-found")]
@@ -41,7 +41,7 @@ namespace API.Controllers
         [HttpGet("bad-request")]
         public ActionResult<AppUser> BadUserRequest()
         {
-            return BadRequest("Invalid Request");
+            return BadRequest();
         }
 
     }

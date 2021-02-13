@@ -1,1 +1,29 @@
-<p>Hello Henry! </p>
+<div class="text-center mt-3">
+    <h2>List of people who {{predicate == 'like'? 'I liked':'liked me'}}.</h2>
+</div>
+<div class="container mt-3">
+    <div class="btn-group" name="predicate">
+        <button type="button" btnRadio="like" class="btn btn-primary" 
+            name="predicate" [(ngModel)]="predicate" (click)="loadLikes()">Liked People</button>
+        <button type="button" btnRadio="likeBy" class="btn btn-primary" 
+            name="predicate" [(ngModel)]="predicate" (click)="loadLikes()">Liked By People</button>
+    </div>  
+    <div class="row mt-3" >
+        <div class="col-2" *ngFor="let member of likes">
+            <app-members-card [member]="member" ></app-members-card>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-center" *ngIf="pagination">
+    <pagination 
+        [boundaryLinks]="true" 
+        [totalItems]="pagination.totalItems"
+        [itemsPerPage]="pagination.itemsPerPage"
+        [(ngModel)]="pagination.currentPage"
+        (pageChanged)="pageChange($event)"
+        previousText="&lsaquo;" 
+        nextText="&rsaquo;" 
+        firstText="&laquo;" 
+        lastText="&raquo;">
+    </pagination>
+</div>
