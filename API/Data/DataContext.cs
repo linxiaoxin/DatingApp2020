@@ -27,8 +27,18 @@ namespace API.Data
                 .HasForeignKey(k => k.likedUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany(u => u.MessagesSent)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Recipient)
+                .WithMany(u => u.MessagesReceived)
+                .OnDelete(DeleteBehavior.Restrict);
         }
         public DbSet<AppUser> Users { get; set; }
         public DbSet<UserLikes> Likes {get; set;}
+        public DbSet<Message> Messages { get; set; }
     }
 }
