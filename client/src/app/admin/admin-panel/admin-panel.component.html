@@ -1,0 +1,12 @@
+<div class="row">
+    <div class="table">
+        <tabset class="member-tabset">
+            <tab heading="User Management" *appHasRole='["Admin"]'>
+                <app-user-management></app-user-management>
+            </tab>
+            <tab heading="Photo Management" *appHasRole='["Admin","Moderator"]'>
+                <app-photo-management></app-photo-management>
+            </tab>
+        </tabset>
+    </div>
+</div>

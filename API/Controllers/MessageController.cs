@@ -41,7 +41,7 @@ namespace API.Controllers
                 RecipientUserName = recipient.UserName,
                 Content = message.Content
             };
-            _messageRepository.AddMessage(newMsg);
+            await _messageRepository.AddMessage(newMsg);
             if (await _messageRepository.SaveAllAsync()) return Ok(_mapper.Map<MessageDTO>(newMsg));
             return BadRequest("Fail to send message");
         }

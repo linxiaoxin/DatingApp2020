@@ -34,6 +34,9 @@ export class AccountService {
   }
 
   setCurrentUser(user: User) {
+    const roles = this.decodedToken(user.token).role;
+    console.log(typeof(roles));
+    Array.isArray(roles)? user.roles = roles: user.roles = [roles];
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserReplay.next(user);
   };
@@ -47,5 +50,10 @@ export class AccountService {
         return response;
       })
     );
+  }
+
+  decodedToken(token){
+    console.log(token);
+    return JSON.parse(atob(token.split('.')[1]));
   }
 }
