@@ -4,6 +4,7 @@ import { ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators'
 import { environment } from 'src/environments/environment';
 import { User } from '../_models/user';
+import { PresencehubService } from './presencehub.service';
 
 //services is injectable and a singleton
 @Injectable({
@@ -11,7 +12,7 @@ import { User } from '../_models/user';
 })
 export class AccountService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private presenceHub: PresencehubService) { }
 
   baseUrl = environment.apiUrl;
   private currentUserReplay = new ReplaySubject<User>(1);
@@ -21,7 +22,8 @@ export class AccountService {
     return this.http.post(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         if (response) {
-          this.setCurrentUser(response);          
+          this.setCurrentUser(response);
+          this.presenceHub.createSignalrConnection(response);          
         }
         return response;
       })
@@ -31,6 +33,7 @@ export class AccountService {
   logout() {
     localStorage.removeItem('user');
     this.currentUserReplay.next(null);
+    this.presenceHub.destroySignalRConnection();
   }
 
   setCurrentUser(user: User) {
@@ -46,6 +49,7 @@ export class AccountService {
       map((response: User) => {
         if(response){
           this.setCurrentUser(response);
+          this.presenceHub.createSignalrConnection(response);
         }
         return response;
       })

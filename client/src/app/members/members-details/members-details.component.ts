@@ -66,7 +66,12 @@ export class MembersDetailsComponent implements OnInit {
   }
 
   loadTab(event: TabDirective){
-    if(event.heading === 'Messages' && this.messages.length ==0 ) this.loadMessage();
+    if(event.heading === 'Messages' && this.messages.length ==0 )
+    { 
+      this.messagingService.createSignalRConnection(this.member.userName);
+    }
+    else 
+    this.messagingService.destroySignalRConnection();
   }
 
   selectTab(heading){

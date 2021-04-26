@@ -54,5 +54,9 @@ namespace API.Data
         }
         public DbSet<UserLikes> Likes {get; set;}
         public DbSet<Message> Messages { get; set; }
+
+        public DbSet<MsgGroup> MsgGroup {get; set;}
+
+        public DbSet<Connection> Connection { get; set; }
     }
 }
