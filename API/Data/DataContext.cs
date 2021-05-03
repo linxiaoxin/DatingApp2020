@@ -1,3 +1,4 @@
+using System;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -15,6 +16,9 @@ namespace API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder){
             base.OnModelCreating(modelBuilder);    
 
+            modelBuilder.Entity<Photo>()
+            .HasQueryFilter(p => p.moderateDate != null && p.isApproved);
+            
             modelBuilder.Entity<AppUser>()
                 .HasMany(u => u.UserRoles)
                 .WithOne(ur => ur.User)
@@ -51,6 +55,14 @@ namespace API.Data
                 .HasOne(m => m.Recipient)
                 .WithMany(u => u.MessagesReceived)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+            .Property(m => m.DateRead)
+            .HasConversion(v => v, v=> v==null? v: DateTime.SpecifyKind((DateTime)v, DateTimeKind.Utc));
+                
+            modelBuilder.Entity<Message>()
+            .Property(m => m.DateSent)
+            .HasConversion(v => v, v=> DateTime.SpecifyKind(v, DateTimeKind.Utc));
         }
         public DbSet<UserLikes> Likes {get; set;}
         public DbSet<Message> Messages { get; set; }

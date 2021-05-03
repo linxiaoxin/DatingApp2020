@@ -14,12 +14,13 @@ namespace API.Interface
 
         Task<AppUser> GetUserByIdAsync(int Id);
 
-        Task<MemberDTO> GetMemberByUserNameAsync(string username);
+        Task<MemberDTO> GetMemberByUserNameAsync(string username, bool isCurrentUser);
 
         Task<PageList<MemberDTO>> GetMembersAsync(UserParams userParams);
 
+        Task<List<PhotoForModerationDTO>> GetMemberUnApprovedPhotos();
+
         void Update(AppUser user);
 
-        Task<bool> SaveAllAsync();
     }
 }

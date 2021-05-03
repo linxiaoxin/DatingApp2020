@@ -1,9 +1,9 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Message } from 'src/app/_models/message';
 import { MessagingService } from 'src/app/_services/messaging.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-member-messages',
   templateUrl: './member-messages.component.html',
   styleUrls: ['./member-messages.component.css']
@@ -29,7 +29,7 @@ export class MemberMessagesComponent implements OnInit, OnDestroy {
       this.newMsg ="";
      })
     .catch(error => console.log(error));
-    this.sendMsgForm.reset();
+    //this.sendMsgForm.reset();
     }
 
 }

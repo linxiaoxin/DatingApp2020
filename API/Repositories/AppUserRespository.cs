@@ -24,7 +24,7 @@ namespace API.Repositories
 
         public async Task<List<AppUser>> GetUsersAsync()
         {
-            return await _context.Users.Include(u => u.Photos).ToListAsync();
+            return await _context.Users.Include(u => u.Photos).IgnoreQueryFilters().ToListAsync();
         }
 
         public async Task<AppUser> GetUserByIdAsync(int Id)
@@ -34,48 +34,66 @@ namespace API.Repositories
 
         public async Task<AppUser> GetUserByUserNameAsync(string username)
         {
-            return await _context.Users.Include(x => x.Photos).SingleOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
+            return await _context.Users.Include(x => x.Photos).IgnoreQueryFilters().SingleOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
         }
 
-        public async Task<MemberDTO> GetMemberByUserNameAsync(string username)
+        public async Task<MemberDTO> GetMemberByUserNameAsync(string username, bool isCurrentUser)
         {
-            var member = await _context.Users
-                        .Where(u => u.UserName.ToLower() == username.ToLower())
+            var member = _context.Users
+                        .Where(u => u.UserName.ToLower() == username.ToLower() )
                         .ProjectTo<MemberDTO>(_mapper.ConfigurationProvider)
-                        .SingleOrDefaultAsync();
+                        .AsQueryable();
 
-            return member;
+            if(isCurrentUser) member = member.IgnoreQueryFilters();
+            return await member.SingleOrDefaultAsync();
         }
 
         public async Task<PageList<MemberDTO>> GetMembersAsync(UserParams userParams)
         {
             var minDOB = System.DateTime.Today.AddYears(-(userParams.MaxAge+1));
             var maxDOB = System.DateTime.Today.AddYears(-userParams.MinAge);
-
             var query = _context.Users.AsQueryable()
                         .Where(x => x.DateOfBirth >= minDOB
                                 && x.DateOfBirth <= maxDOB
-                                && x.UserName.ToLower() != userParams.UserName.ToLower());
-
-            if(userParams.Gender != null &&  userParams.Gender != "")
-                query = query.Where(x=> x.Gender == userParams.Gender);
-
+                                && x.UserName.ToLower() != userParams.UserName.ToLower()
+                                && (string.IsNullOrEmpty(userParams.Gender) || x.Gender.ToLower() == userParams.Gender.ToLower()))
+                        .ProjectTo<MemberDTO>(_mapper.ConfigurationProvider)
+                        .AsNoTracking();            
             //sort By
             query = userParams.OrderBy switch{
                 "created" =>query.OrderByDescending(x=> x.CreatedDate),
-                "age" => query.OrderBy(x => x.DateOfBirth),
+                "age" => query.OrderBy(x => x.Age),
                 _ => query.OrderByDescending(x => x.LastActive) 
             };
-            return await PageList<MemberDTO>.CreateAsync(query.ProjectTo<MemberDTO>(_mapper.ConfigurationProvider)
-                        .AsNoTracking(), userParams.PageSize, userParams.PageNumber);
+            return await PageList<MemberDTO>.CreateAsync(query, userParams.PageSize, userParams.PageNumber);
         }
 
+        
         public void Update(AppUser user){
            _context.Users.Update(user);
         }
 
-        public async Task<bool> SaveAllAsync(){
-           return await _context.SaveChangesAsync() > 0;
+        public async Task<List<PhotoForModerationDTO>> GetMemberUnApprovedPhotos()
+        {
+            var users = await _context.Users.IgnoreQueryFilters()
+            .Include(x => x.Photos.Where(p=> p.moderateDate == null))
+            .ToListAsync();
+
+            var photos = new List<PhotoForModerationDTO>();
+
+            foreach(var user in users){
+              photos.AddRange( user.Photos.Select(p => new PhotoForModerationDTO{
+                  id = p.Id,
+                  url = p.Url,
+                  isApproved = p.isApproved,
+                  moderateDate = p.moderateDate,
+                  userName = user.UserName,
+                  knownAs = user.KnownAs  
+              }));                 
+            }
+            
+            return photos;
         }
+
     }
 }

@@ -12,44 +12,44 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [Authorize]
-    public class LikesController: BaseApiController
+    public class LikesController : BaseApiController
     {
-        private readonly IUserLikesRespository _userLikes;
-        private readonly IAppUserRespository _users;
-        public LikesController(IUserLikesRespository userLikes, IAppUserRespository users)
+        private readonly IRespositories _mainRepositories;
+        public LikesController(IRespositories mainRepositories)
         {
-            _users = users;
-            _userLikes = userLikes;
+            _mainRepositories = mainRepositories;
         }
 
         [HttpPost("{username}")]
         public async Task<ActionResult> AddLike(string username)
         {
             var userId = User.GetUserId();
-            var user = await _userLikes.GetUserWithLikes(userId);
-            var likedUser = await _users.GetUserByUserNameAsync(username);
+            var user = await _mainRepositories.UserLikesRespository.GetUserWithLikes(userId);
+            var likedUser = await _mainRepositories.AppUserRespository.GetUserByUserNameAsync(username);
 
-            if(likedUser == null) 
+            if (likedUser == null)
                 return NotFound();
-            if(likedUser.Id == userId) 
+            if (likedUser.Id == userId)
                 return BadRequest("You cannot like yourself.");
-            if(user.LikedUsers.Any(x => x.likedUserId == likedUser.Id) ) 
-                return BadRequest("Person was liked.");           
+            if (user.LikedUsers.Any(x => x.likedUserId == likedUser.Id))
+                return BadRequest("Person was liked.");
 
-            var userlikes = new UserLikes{
+            var userlikes = new UserLikes
+            {
                 likedByUserId = userId,
                 likedUserId = likedUser.Id
             };
             user.LikedUsers.Add(userlikes);
-            if(! await _users.SaveAllAsync()) 
+            if (!await _mainRepositories.Complete())
                 return BadRequest("Fail to add likes");
             return Ok();
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LikesDTO>>> GetLikes([FromQuery]LikesParams likesParmas){
+        public async Task<ActionResult<IEnumerable<LikesDTO>>> GetLikes([FromQuery] LikesParams likesParmas)
+        {
             likesParmas.UserId = User.GetUserId();
-            var user = await  _userLikes.GetLikes(likesParmas);
+            var user = await _mainRepositories.UserLikesRespository.GetLikes(likesParmas);
             Response.addPaginationHeader(user.CurrentPage, user.PageSize, user.TotalCount, user.TotalPages);
             return Ok(user);
         }

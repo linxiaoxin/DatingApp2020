@@ -5,6 +5,7 @@ import { Member } from 'src/app/_models/member';
 import { Photo } from 'src/app/_models/photo';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
+import { ConfirmDialogService } from 'src/app/_services/confirm-dialog.service';
 import { MembersService } from 'src/app/_services/members.service';
 import { environment } from 'src/environments/environment';
 
@@ -19,7 +20,7 @@ export class PhotoEditorComponent implements OnInit {
   hasBaseDropZoneOver = false;
   baseUrl = environment.apiUrl;
   user: User;
-  constructor(private accountService: AccountService, private memberService: MembersService) { 
+  constructor(private accountService: AccountService, private memberService: MembersService, private confirmService: ConfirmDialogService) { 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => this.user = user);
   }
 
@@ -70,8 +71,13 @@ export class PhotoEditorComponent implements OnInit {
   }
 
   deletePhoto(photo){
-    this.memberService.deletePhoto(photo.id).subscribe(x => {
-      this.member.photos = this.member.photos.filter(x => x.id !== photo.id);
-    });
+    this.confirmService.OpenConfirmDialog('Delete Photo', 'Action cannot be undo. Click Ok to confirm.').subscribe(
+      result =>{
+        if(result)
+          this.memberService.deletePhoto(photo.id).subscribe(x => {
+            this.member.photos = this.member.photos.filter(x => x.id !== photo.id);
+          });
+      }
+    );
   }
 }

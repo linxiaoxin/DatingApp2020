@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -32,7 +33,7 @@ namespace API.Controllers
         {
             if (await ExistUser(userDTO.Username)) return BadRequest("Username is taken.");
             var user = _mapper.Map<AppUser>(userDTO);
-
+            user.CreatedDate = DateTime.UtcNow;
             user.UserName = userDTO.Username.ToLower();
             var result = await _usermanager.CreateAsync(user, userDTO.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
@@ -51,7 +52,7 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> login(LoginUserDTO loginUserDTO)
         {
-            var user = await _usermanager.Users.Include(x => x.Photos).SingleOrDefaultAsync(u => u.UserName.ToLower() == loginUserDTO.Username.ToLower());
+            var user = await _usermanager.Users.Include(x => x.Photos).IgnoreQueryFilters().SingleOrDefaultAsync(u => u.UserName.ToLower() == loginUserDTO.Username.ToLower());
 
             if (user == null) return Unauthorized("Invalid username");
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginUserDTO.Password, false );

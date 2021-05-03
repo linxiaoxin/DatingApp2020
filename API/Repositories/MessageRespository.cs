@@ -51,6 +51,7 @@ namespace API.Repositories
         public async Task<PageList<MessageDTO>> GetMessageByUserName(MessageParams msgParams)
         {
             var query = _context.Messages
+                        .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider)
                         .OrderByDescending(m => m.DateSent).AsQueryable();
 
             query = msgParams.Container switch{
@@ -59,9 +60,7 @@ namespace API.Repositories
              _ =>  query.Where(m => m.RecipientUserName.ToLower() == msgParams.UserName.ToLower() && m.DateRead == null && !m.RecipientDeleted)  
             };
 
-            var result = query.ProjectTo<MessageDTO>(_mapper.ConfigurationProvider);
-
-            return await PageList<MessageDTO>.CreateAsync(result,msgParams.PageSize,msgParams.PageNumber);
+            return await PageList<MessageDTO>.CreateAsync(query,msgParams.PageSize,msgParams.PageNumber);
         }
 
         public async Task<MsgGroup> GetMessageGroup(string groupname)
@@ -72,14 +71,13 @@ namespace API.Repositories
         public async Task<IEnumerable<MessageDTO>> GetMessageThread(string thisUserName, string otherUserName)
         {
             var msgs = await _context.Messages
-                .Include(m => m.Sender).ThenInclude(s => s.Photos)
-                .Include(m => m.Recipient).ThenInclude(r => r.Photos)
                 .Where(m => (m.RecipientUserName.ToLower() == thisUserName.ToLower() && m.SenderUserName.ToLower() == otherUserName.ToLower()
                             && !m.RecipientDeleted)
                         || (m.RecipientUserName.ToLower() == otherUserName.ToLower() && m.SenderUserName.ToLower() == thisUserName.ToLower()
                             && !m.SenderDeleted)
                         )
                 .OrderBy(m => m.DateSent)
+                .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider).AsTracking()
                 .ToListAsync();
 
             var UnReadmsg = msgs.Where(m => m.RecipientUserName.ToLower() == thisUserName.ToLower() && m.DateRead == null).ToList();
@@ -87,8 +85,7 @@ namespace API.Repositories
                m.DateRead = DateTime.UtcNow;         
             });
             await _context.SaveChangesAsync();
-
-            return _mapper.Map<IEnumerable<MessageDTO>>(msgs);
+            return msgs;
         }
 
         public async Task<MsgGroup> GetMsgGroupForConnection(string connectionId)
@@ -103,9 +100,5 @@ namespace API.Repositories
            _context.Connection.Remove(connection);
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
     }
 }

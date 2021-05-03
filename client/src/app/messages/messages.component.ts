@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Message } from '../_models/message';
 import { Pagination } from '../_models/pagination';
+import { ConfirmDialogService } from '../_services/confirm-dialog.service';
 import { MessagingService } from '../_services/messaging.service';
 
 @Component({
@@ -10,7 +11,7 @@ import { MessagingService } from '../_services/messaging.service';
 })
 export class MessagesComponent implements OnInit {
 
-  constructor(private messagingService: MessagingService) { }
+  constructor(private messagingService: MessagingService, private confirmService: ConfirmDialogService) { }
   container: string = 'Unread';
   pageNumber: number =1;
   pageSize: number = 10;
@@ -36,10 +37,14 @@ export class MessagesComponent implements OnInit {
     this.loadMessages();
   }
   deleteMessage(id){
-    this.messagingService.deleteMessage(id).subscribe(() =>{
-      this.messages.forEach((m, index) => {
-        if(m.id == id)  this.messages.splice(index, 1); 
-      })
+    this.confirmService.OpenConfirmDialog("Delete Photo", "Action cannot be undone. Ok to proceed", "OK", "Cancel").subscribe(result =>{
+      if(result){
+        this.messagingService.deleteMessage(id).subscribe(() =>{
+          this.messages.forEach((m, index) => {
+            if(m.id == id)  this.messages.splice(index, 1); 
+          })
+        });
+      }
     });
   }
 }

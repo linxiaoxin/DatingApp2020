@@ -51,6 +51,7 @@ export class PresencehubService {
   }
 
   destroySignalRConnection(){
-    this.hubConnection.stop();
+    if(this.hubConnection)
+      this.hubConnection.stop();
   }
 }

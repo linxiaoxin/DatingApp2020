@@ -37,6 +37,7 @@ export class AccountService {
   }
 
   setCurrentUser(user: User) {
+    if(!user) return;
     const roles = this.decodedToken(user.token).role;
     console.log(typeof(roles));
     Array.isArray(roles)? user.roles = roles: user.roles = [roles];

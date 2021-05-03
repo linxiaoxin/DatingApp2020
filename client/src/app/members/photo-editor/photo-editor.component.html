@@ -1,8 +1,10 @@
 <div class="row">
     <div class="col-2" *ngFor="let photo of member.photos">
         <img src="{{photo.url}}" class="img-thumbnail p-1">
+        <div style="position:relative; top: -40px;font-size: small;font-weight: bold;color:silver;" *ngIf="photo.moderateDate==null">Pending Approval</div>
+        <div style="position:relative; top: -40px;font-size: small;font-weight: bold;color:darkred" *ngIf="photo.moderateDate!=null && !photo.isApproved">Rejected</div>
         <div class="text-center">
-            <button class="btn btn-sm" [disabled]="photo.isMain" (click)="setMainPhoto(photo)" [ngClass]="photo.isMain?'btn-secondary active':'btn-outline-secondary'">Main</button>
+            <button class="btn btn-sm" [disabled]="photo.isMain || !photo.isApproved" (click)="setMainPhoto(photo)" [ngClass]="photo.isMain?'btn-secondary active':'btn-outline-secondary'">Main</button>
             <button class="btn btn-sm btn-danger" [disabled]="photo.isMain" (click)="deletePhoto(photo)" ><i class="fa fa-trash"></i></button>
         </div>
     </div>

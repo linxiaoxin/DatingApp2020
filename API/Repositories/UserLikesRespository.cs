@@ -25,7 +25,7 @@ namespace API.Repositories
             IQueryable<LikesDTO> result = null;
             if(likesParams.Predicate == "like"){
                 result = _context.Users
-                    .Include(u => u.Photos)
+                    .Include(x => x.Photos)
                     .Where(x => _context.Likes.Where(x => x.likedByUserId == likesParams.UserId).Select(x=>x.likedUserId).Contains(x.Id))
                     .Select(u => new LikesDTO{
                         UserName =  u.UserName,
@@ -33,7 +33,7 @@ namespace API.Repositories
                         photoUrl = u.Photos.FirstOrDefault(x => x.isMain).Url,
                         Age = u.Age,
                         KnownAs = u.KnownAs,
-                    });
+                    }).OrderBy(x => x.KnownAs);
             }
             if(likesParams.Predicate ==  "likeBy"){
                 result = _context.Users
@@ -45,7 +45,7 @@ namespace API.Repositories
                         photoUrl = u.Photos.FirstOrDefault(x => x.isMain).Url,
                         Age = u.Age,
                         KnownAs = u.KnownAs,
-                    });
+                    }).OrderBy(x => x.KnownAs);
             }
             
             return await PageList<LikesDTO>.CreateAsync(result, likesParams.PageSize, likesParams.PageNumber);
